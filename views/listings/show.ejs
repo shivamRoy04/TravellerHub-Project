@@ -1,0 +1,41 @@
+<%layout("/layouts/boilerplate")%>
+<body>
+    <div class="row">
+        <div class="col-8 offset-3"> <h2>Property details</h2>
+        </div>
+        
+        <div class="card col-6 offset-3 show-card">
+ <img src="<%=item.image.url%>" class="card-img-top show-img" alt="listing-img">
+  <div class="card-body">
+    <p class="card-text">
+        <br>
+        <b><%=item.title%></b>
+        <br/>
+        <%=item.description%>
+        <br/>
+        &#8377 <%=item.price.toLocaleString("en-IN")%>
+          <br/>
+          <%=item.location%>
+          <br/>
+          <%=item.country%>
+
+    </p>
+  </div>
+ </div>
+ <!-- Buttons aligned with card text -->
+<div class="d-flex justify-content-start ms-5 mt-3 gap-3" style="margin-bottom: 15px;">
+  <a href="/listing/<%=item._id%>/edit" class="btn btn-dark edit-btn" style="margin-left: 14rem;">Edit</a>
+
+  <form method="POST" action="/listing/<%=item._id%>?_method=DELETE">
+    <button class="btn btn-dark">Delete</button>
+  </form>
+</div>
+
+ 
+ 
+    </div>
+
+    
+    
+</body>
+</html>

@@ -1,0 +1,54 @@
+<%layout("/layouts/boilerplate")%>
+<body>
+    <br/>
+    
+     <h2 style="margin-left: 11rem;">         Create your new listings</h2>
+    <form method="POST" action="/listing">
+        <div class="row">
+            <div class="col-8 offset-2">
+        <div class="mb-3">
+              <label class="form-label" for="title">title</label>
+        <input name="listing[title]" placeholder="Enter the property title" type="text" class="form-control"/>
+        <br />
+        </div>
+        <div class="mb-3">
+           <label class="form-label" for="description">description</label>
+        <textarea name="listing[description]" type="text" class="form-control"></textarea>
+        <br />
+    </div>
+   
+       <div class="mb-3">
+        <label for="image" class="form-label">Image/URL</label>
+        <input name="listing[image][url]" placeholder="Add img url" type="text" class="form-control" />
+        <br />
+    </div> 
+     <div class="row">
+             <div class="mb-3 col-md-4">
+        <label for="price" class="form-label">Price</label>
+        <input name="listing[price]" placeholder="Enter the property price" type="number" class="form-control"/>
+        <br />
+    </div>
+
+        <div class="mb-3 col-md-8">
+
+            <label for="country" class="form-label">country</label>
+             <input name="listing[country]" placeholder="Enter the property country" type="text" class="form-control"/>
+        <br />
+
+        </div>
+        </div>
+        <div class="mb-3">
+            <label for="location" class="form-label">Location</label>
+<input name="listing[location]" placeholder="Enter the property location" type="text" class="form-control" />
+        <br />
+        </div>
+       
+       </div> 
+        <button class="btn btn-dark add-btn" style="width: 7%;margin-left: 12rem;">Add</button>
+ 
+    </form>
+    </div>
+           <br/>
+    <br/>
+</body>
+</html>
