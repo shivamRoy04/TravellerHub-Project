@@ -1,9 +1,7 @@
 <%layout("/layouts/boilerplate")%>
 <body>
     <h2>All Listings</h2>
-    <!-- <form method="get" action="/listing/new">
-        <button>ADD new Property</button>
-    </form> -->
+    
     <div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 row-cols-xs-1"> 
         <%for(let List of allListings){%>
             <a href="/listing/<%=List._id%>" class="listing-link">
@@ -25,4 +23,3 @@
 
     
 </body>
-</html>
