@@ -1,5 +1,14 @@
 <%layout("/layouts/boilerplate")%>
+
 <body>
+         <%if(success && success.length){%> 
+          <div class="alert alert-success alert-dismissable fade show col-6 offset-3" role="alert">
+            <%=success%>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"aria-label="close"></button>
+          </div>
+          
+          <%}%>
+
     <h2>All Listings</h2>
     
     <div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 row-cols-xs-1"> 

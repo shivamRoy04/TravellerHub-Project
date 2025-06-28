@@ -10,6 +10,13 @@ const wrapAsync = require("./utils/wrapAsync.js");
 const ExpressError = require("./utils/ExpressError.js");
 const Review = require("./models/review.js");
 const {listingSchema,reviewSchema} = require("./schema.js");
+const session = require("express-session");
+const flash = require("connect-flash");
+const passport = require("passport");
+const LocalStrategy = require("passport-local");
+const User = require("./models/users.js");
+
+
 
 
 // Register middleware BEFORE routes
@@ -21,6 +28,22 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.engine("ejs", ejsMate);
 
+let sessionoptions = {
+  secret:"mysecret",
+  resave:false,
+  saveUninitialized:true,
+};
+app.use(session(sessionoptions));
+app.use(flash());
+app.use(passport.initialize());
+app.use(passport.session());
+//authentication of user through local strategy
+passport.use(new LocalStrategy(User.authenticate()));
+
+
+//serializing and deserializing user
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser())
 
 app.listen(8080,()=>{
     console.log("listening at port 8080");
@@ -29,6 +52,8 @@ app.listen(8080,()=>{
 app.get("/",(req,res)=>{
     res.send("HI im root");
 });
+
+
 let url = 'mongodb://127.0.0.1:27017/TravellerHub';
 
 
@@ -37,27 +62,13 @@ async function main() {
 }
 main().then(()=>{console.log("connected succesfully")}).catch(err => console.log(err));
 
+app.use((req,res,next)=>{
+   res.locals.success=req.flash("success");
+   //res.locals.error=req.flash("error");
+   next();
+});
 
 
-//listing check
-// app.get("/listing", async (req, res) => {
-//   try {
-//     let sampleListing = new Listing({
-//       title: "Newest villa",
-//       description: "This is a newly opened modern well equipped villa",
-//       price: 12000,
-//       location: "Calangute, Goa",
-//       country: "India"
-//     });
-
-//     await sampleListing.save();
-//     console.log("Sample listing saved!");
-//     res.send("Sample listing saved successfully");
-//   } catch (err) {
-//     console.error("Error saving listing:", err);
-//     res.status(500).send("Error saving listing");
-//   }
-// });
 const validateListing = (req, res, next) => {
   const { error } = listingSchema.validate(req.body);
   if (error) {
@@ -76,10 +87,26 @@ const validateReview = (req, res, next) => {
   next();
 };
 
+
+//fake user demo test
+app.get("/demo",async(req,res)=>{
+      let fakeuser = new User({
+        email:"abc@gmail.com",
+        username:"allhahuakbar"
+      });
+      let registerduser = await User.register(fakeuser,"password");
+      res.send(registerduser);
+
+});
+
+
+//index page
 app.get("/listings" ,wrapAsync( async(req,res)=>{
   let allListings = await Listing.find({});
   res.render("./listings/index.ejs",{allListings});
 }));
+
+
 //new form
 app.get("/listing/new",(req,res)=>{
   res.render("./listings/new.ejs");
@@ -90,14 +117,22 @@ app.get("/listing/new",(req,res)=>{
 app.get("/listing/:id",wrapAsync(async(req,res)=>{
   let {id} = req.params;
   const item = await Listing.findById(id).populate("reviews");
-  console.log(item.reviews);
+  
+  // if(!item){
+  //   req.flash("error","Your requested listing doesn't exist");
+  //   return res.redirect("./listings");
+  // }
   res.render("./listings/show.ejs",{item});
 }));
+
+
 //post req
 app.post("/listing",validateListing,wrapAsync(async(req,res)=>{
      
           const newListing = new Listing(req.body.listing);
           await newListing.save();
+          req.flash("success","New Listing Created");
+         
          res.redirect("/listings");
 }));
 
@@ -115,6 +150,7 @@ app.get("/listing/:id/edit",wrapAsync(async(req,res)=>{
 app.put("/listing/:id/edit",validateListing,wrapAsync( async(req,res)=>{
          let {id} = req.params;
         await Listing.findByIdAndUpdate(id,{...req.body.listing});
+        
           res.redirect(`/listing/${id}`);
 }));
 //delete route
@@ -123,9 +159,10 @@ app.delete("/listing/:id",wrapAsync(async(req,res)=>{
   let {id} = req.params;
   const deltedListing = await Listing.findByIdAndDelete(id);
   console.log(deltedListing);
+  req.flash("success","Listing was delted");
   res.redirect("/listings");
 }));
-//Review Route
+// //Review Route
  //Post request for the review
  app.post("/listing/:id/review",validateReview,wrapAsync(async(req,res)=>{
       let listing =  await Listing.findById(req.params.id);
@@ -147,6 +184,42 @@ app.delete("/listing/:id",wrapAsync(async(req,res)=>{
         await Review.findByIdAndDelete(reviewId);
         res.redirect(`/listing/${id}`);
  }));
+
+
+
+
+
+ //new sign up
+ app.get("/signup",(req,res)=>{
+  res.render("./user/signup.ejs");
+ });
+
+ //post 
+ app.post("/signup",wrapAsync(async(req,res)=>{
+            let{username,email,password }= req.body;
+            const newUser = new User({email,username});
+           let registeredUser = await User.register(newUser,password);
+           console.log(registeredUser);
+           req.flash("success","Welcome to our site");
+           res.redirect("/listings");
+ }));
+
+//login
+app.get("/login",(req,res)=>{
+   res.render("./user/login.ejs");
+});
+
+//post login
+app.post("/login",
+  passport.authenticate("local",{failureRedirect:"/login", failureFlash:true}),
+  async(req,res)=>{
+    req.flash("success","You're logged in now");
+    res.redirect("/listings");
+
+});
+
+
+
 
 // Catch-all route for undefined paths
 app.use( (req, res, next) => {
