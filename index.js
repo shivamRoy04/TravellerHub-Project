@@ -217,7 +217,16 @@ app.post("/login",
     res.redirect("/listings");
 
 });
-
+//logout
+app.get("/logout",(req,res,next)=>{
+  req.logout((err)=>{
+    if(err){
+      return next(err);
+    }
+    req.flash("err","You were logged out");
+    res.redirect("/listings"); 
+  })
+});
 
 
 
