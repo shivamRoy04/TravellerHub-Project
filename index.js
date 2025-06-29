@@ -62,11 +62,13 @@ async function main() {
 }
 main().then(()=>{console.log("connected succesfully")}).catch(err => console.log(err));
 
-app.use((req,res,next)=>{
-   res.locals.success=req.flash("success");
-   res.locals.error=req.flash("error");
-   next();
+app.use((req, res, next) => {
+   res.locals.success = req.flash("success");
+   res.locals.error = req.flash("error");
+   res.locals.curUser = req.user; 
+   next(); 
 });
+
 
 
 const validateListing = (req, res, next) => {
@@ -200,8 +202,14 @@ app.delete("/listing/:id",isLoggedIn,wrapAsync(async(req,res)=>{
             const newUser = new User({email,username});
            let registeredUser = await User.register(newUser,password);
            console.log(registeredUser);
-           req.flash("success","Welcome to our site");
+           req.login(registeredUser,(err)=>{
+            if(err){
+              return next(err);
+            }
+             req.flash("success","Welcome to our site");
            res.redirect("/listings");
+           });
+          
  }));
 
 //login
