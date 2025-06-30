@@ -3,7 +3,7 @@
     <br/>
     <h2 style="margin-left: 11rem;">Edit your listing</h2>
 
-    <form method="POST" action="/listing/<%= item._id %>/edit?_method=PUT" novalidate class="needs-validation">
+    <form method="POST" action="/listing/<%= item._id %>/edit?_method=PUT" novalidate class="needs-validation" enctype="multipart/form-data">
         <div class="row">
             <div class="col-8 offset-2">
                 
@@ -20,8 +20,8 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label" for="image">Image/URL</label>
-                    <input name="listing[image][url]" value="<%= item.image.url %>" type="text" class="form-control" placeholder="Add image URL" required/>
+                    <label class="form-label" for="image">Image Upload </label>
+                    <input name="listing[image]" value="<%= item.image.url %>" type="file" class="form-control" placeholder="Add image URL"/>
                     <div class="invalid-feedback">Enter a image url</div>
                 </div>
 

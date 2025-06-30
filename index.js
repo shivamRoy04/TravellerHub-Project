@@ -1,3 +1,5 @@
+if(process.env.NODE_ENV !="production"){
+require('dotenv').config();}
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
@@ -6,8 +8,7 @@ const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 const {storage} = require("./cloudconfig.js")
 const multer = require("multer");
-if(process.env.NODE_ENV !="production"){
-require('dotenv').config();}
+
 
 const Listing = require("./models/listing.js");
 const wrapAsync = require("./utils/wrapAsync.js");
@@ -21,7 +22,6 @@ const LocalStrategy = require("passport-local");
 const User = require("./models/users.js");
 const {isLoggedIn, saveRedirectUrl, isOwner, isAuthor} = require("./middleware.js");
 const upload = multer({storage});
-
 
 
 // Register middleware BEFORE routes
@@ -95,18 +95,6 @@ const validateReview = (req, res, next) => {
 };
 
 
-// //fake user demo test
-// app.get("/demo",async(req,res)=>{
-//       let fakeuser = new User({
-//         email:"abc@gmail.com",
-//         username:"allhahuakbar"
-//       });
-//       let registerduser = await User.register(fakeuser,"password");
-//       res.send(registerduser);
-
-// });
-
-
 //index page
 app.get("/listings" ,wrapAsync( async(req,res)=>{
   let allListings = await Listing.find({});
@@ -130,18 +118,23 @@ app.get("/listing/:id",wrapAsync(async(req,res)=>{
 
 
 //post req
-app.post("/listing",validateListing,upload.single("listing[image]"),wrapAsync(async(req,res)=>{
-     
-          const newListing = new Listing(req.body.listing);
-          newListing.owner = req.user._id;
-          await newListing.save();
-          req.flash("success","New Listing Created");
-         
-         res.redirect("/listings");
-        
+
+app.post("/listing", isLoggedIn, upload.single("listing[image]"), (req, res, next) => {
+    if (req.file) {
+        req.body.listing.image = req.file.path;
+    }
+    next();
+}, validateListing, wrapAsync(async (req, res) => {
+    const newListing = new Listing(req.body.listing);
+    newListing.owner = req.user._id;
+    newListing.image = {
+        url: req.file.path,
+        filename: req.file.filename
+    };
+    await newListing.save();
+    req.flash("success", "New Listing Created");
+    res.redirect("/listings");
 }));
-
-
 
 
 //edit route
@@ -152,12 +145,35 @@ app.get("/listing/:id/edit",isLoggedIn,isOwner,wrapAsync(async(req,res)=>{
 
 }));
 //update route
-app.put("/listing/:id/edit",isLoggedIn,validateListing,wrapAsync( async(req,res)=>{
-         let {id} = req.params;
-        await Listing.findByIdAndUpdate(id,{...req.body.listing});
-        
-          res.redirect(`/listing/${id}`);
+app.put("/listing/:id/edit", isLoggedIn, upload.single("listing[image]"), wrapAsync(async (req, res, next) => {
+  const { id } = req.params;
+  const listing = await Listing.findById(id);
+
+  // 👇 Handle image
+  if (req.file) {
+    req.body.listing.image = {
+      url: req.file.path,
+      filename: req.file.filename
+    };
+  } else {
+    // 🧠 Use existing image from DB if no new one uploaded
+    req.body.listing.image = listing.image;
+  }
+
+  // ✅ Validate with pre-filled image
+  const { error } = listingSchema.validate(req.body);
+  if (error) {
+    throw new ExpressError(400, error.details.map(e => e.message).join(", "));
+  }
+
+  // ✅ Update listing
+  await Listing.findByIdAndUpdate(id, { ...req.body.listing });
+  req.flash("success", "Listing updated successfully");
+  res.redirect(`/listing/${id}`);
 }));
+
+
+
 //delete route
 
 app.delete("/listing/:id",isLoggedIn,isOwner,wrapAsync(async(req,res)=>{
@@ -243,8 +259,6 @@ app.get("/logout",(req,res,next)=>{
     res.redirect("/listings"); 
   })
 });
-
-
 
 // Catch-all route for undefined paths
 app.use( (req, res, next) => {

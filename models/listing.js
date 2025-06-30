@@ -14,8 +14,8 @@ const ListingSchema = new Schema({
   image: {
     filename: String,
     url: {
-      type: String,
-      default: "https://unsplash.com/photos/red-and-black-house-near-bushes-4IP7MzmYGOU"
+      type: String
+      
     }
   },
   price: {
