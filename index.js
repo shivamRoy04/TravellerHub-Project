@@ -15,7 +15,7 @@ const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
 const User = require("./models/users.js");
-const {isLoggedIn} = require("./middleware.js");
+const {isLoggedIn, saveRedirectUrl, isOwner, isAuthor} = require("./middleware.js");
 
 
 
@@ -118,12 +118,8 @@ app.get("/listing/new",isLoggedIn,(req,res)=>{
 
 app.get("/listing/:id",wrapAsync(async(req,res)=>{
   let {id} = req.params;
-  const item = await Listing.findById(id).populate("reviews");
-  
-  // if(!item){
-  //   req.flash("error","Your requested listing doesn't exist");
-  //   return res.redirect("./listings");
-  // }
+  const item = await Listing.findById(id).populate({path: "reviews",populate: { path:"author",}}).populate("owner");
+ 
   res.render("./listings/show.ejs",{item});
 }));
 
@@ -132,6 +128,7 @@ app.get("/listing/:id",wrapAsync(async(req,res)=>{
 app.post("/listing",validateListing,wrapAsync(async(req,res)=>{
      
           const newListing = new Listing(req.body.listing);
+          newListing.owner = req.user._id;
           await newListing.save();
           req.flash("success","New Listing Created");
          
@@ -142,7 +139,7 @@ app.post("/listing",validateListing,wrapAsync(async(req,res)=>{
 
 
 //edit route
-app.get("/listing/:id/edit",isLoggedIn,wrapAsync(async(req,res)=>{
+app.get("/listing/:id/edit",isLoggedIn,isOwner,wrapAsync(async(req,res)=>{
   let {id} = req.params;
   const item = await Listing.findById(id);
   res.render("./listings/edit.ejs",{item});
@@ -157,19 +154,21 @@ app.put("/listing/:id/edit",isLoggedIn,validateListing,wrapAsync( async(req,res)
 }));
 //delete route
 
-app.delete("/listing/:id",isLoggedIn,wrapAsync(async(req,res)=>{
+app.delete("/listing/:id",isLoggedIn,isOwner,wrapAsync(async(req,res)=>{
   let {id} = req.params;
   const deltedListing = await Listing.findByIdAndDelete(id);
   console.log(deltedListing);
   req.flash("success","Listing was delted");
   res.redirect("/listings");
 }));
+
+
 // //Review Route
  //Post request for the review
  app.post("/listing/:id/review",validateReview,wrapAsync(async(req,res)=>{
       let listing =  await Listing.findById(req.params.id);
       let newReview = new Review (req.body.review);
-
+        newReview.author = req.user._id;
       listing.reviews.push(newReview);
       await newReview.save();
       await listing.save();
@@ -180,7 +179,7 @@ app.delete("/listing/:id",isLoggedIn,wrapAsync(async(req,res)=>{
 
 
  //delete review route
- app.delete("/listing/:id/review/:reviewId",wrapAsync(async(req,res)=>{
+ app.delete("/listing/:id/review/:reviewId",isLoggedIn,isAuthor,wrapAsync(async(req,res)=>{
         let {id,reviewId} = req.params;
         await Listing.findByIdAndUpdate(id,{$pull:{reviews:reviewId}});
         await Review.findByIdAndDelete(reviewId);
@@ -218,13 +217,16 @@ app.get("/login",(req,res)=>{
 });
 
 //post login
-app.post("/login",
-  passport.authenticate("local",{failureRedirect:"/login", failureFlash:true}),
-  async(req,res)=>{
-    req.flash("success","You're logged in now");
-    res.redirect("/listings");
+app.post("/login", saveRedirectUrl,
+    passport.authenticate("local", { failureRedirect: "/login", failureFlash: true }),
+    (req, res) => {
+        req.flash("success", "You're logged in now");
+        const redirectUrl = res.locals.redirectUrl || "/listings";
+        delete req.session.redirectUrl; //  clear after use
+        res.redirect(redirectUrl);
+    }
+);
 
-});
 //logout
 app.get("/logout",(req,res,next)=>{
   req.logout((err)=>{
