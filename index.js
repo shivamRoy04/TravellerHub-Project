@@ -4,6 +4,10 @@ const mongoose = require("mongoose");
 const path = require("path");
 const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
+const {storage} = require("./cloudconfig.js")
+const multer = require("multer");
+if(process.env.NODE_ENV !="production"){
+require('dotenv').config();}
 
 const Listing = require("./models/listing.js");
 const wrapAsync = require("./utils/wrapAsync.js");
@@ -16,6 +20,7 @@ const passport = require("passport");
 const LocalStrategy = require("passport-local");
 const User = require("./models/users.js");
 const {isLoggedIn, saveRedirectUrl, isOwner, isAuthor} = require("./middleware.js");
+const upload = multer({storage});
 
 
 
@@ -90,16 +95,16 @@ const validateReview = (req, res, next) => {
 };
 
 
-//fake user demo test
-app.get("/demo",async(req,res)=>{
-      let fakeuser = new User({
-        email:"abc@gmail.com",
-        username:"allhahuakbar"
-      });
-      let registerduser = await User.register(fakeuser,"password");
-      res.send(registerduser);
+// //fake user demo test
+// app.get("/demo",async(req,res)=>{
+//       let fakeuser = new User({
+//         email:"abc@gmail.com",
+//         username:"allhahuakbar"
+//       });
+//       let registerduser = await User.register(fakeuser,"password");
+//       res.send(registerduser);
 
-});
+// });
 
 
 //index page
@@ -125,7 +130,7 @@ app.get("/listing/:id",wrapAsync(async(req,res)=>{
 
 
 //post req
-app.post("/listing",validateListing,wrapAsync(async(req,res)=>{
+app.post("/listing",validateListing,upload.single("listing[image]"),wrapAsync(async(req,res)=>{
      
           const newListing = new Listing(req.body.listing);
           newListing.owner = req.user._id;
@@ -133,6 +138,7 @@ app.post("/listing",validateListing,wrapAsync(async(req,res)=>{
           req.flash("success","New Listing Created");
          
          res.redirect("/listings");
+        
 }));
 
 
