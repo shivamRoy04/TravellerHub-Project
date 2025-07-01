@@ -304,6 +304,10 @@ app.get("/logout",(req,res,next)=>{
   })
 });
 
+app.get("/", (req, res) => {
+  res.redirect("/listings");
+});
+
 // Catch-all route for undefined paths
 app.use( (req, res, next) => {
   next(new ExpressError(404, "Page Not Found"));
