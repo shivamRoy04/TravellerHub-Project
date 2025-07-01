@@ -23,6 +23,7 @@ const ExpressError = require("./utils/ExpressError.js");
 const Review = require("./models/review.js");
 const {listingSchema,reviewSchema} = require("./schema.js");
 const session = require("express-session");
+const MongoStore = require('connect-mongo');
 const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
@@ -40,11 +41,35 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.engine("ejs", ejsMate);
 
+
+const dbUrl = process.env.ATLASDB_URL;
+
+async function main() {
+  await mongoose.connect(dbUrl);
+}
+main().then(()=>{console.log("connected succesfully")}).catch(err => console.log(err));
+
+
+const store = MongoStore.create({
+  mongoUrl:dbUrl,
+  crypto:{
+    secret:"mysecret"
+  },
+  touchAfter : 24*60*60,
+});
+store.on("error",()=>{
+  console.log("Error in mongo session store",err);
+});
+
+
 let sessionoptions = {
+  store,
   secret:"mysecret",
   resave:false,
   saveUninitialized:true,
 };
+
+
 app.use(session(sessionoptions));
 app.use(flash());
 app.use(passport.initialize());
@@ -61,13 +86,8 @@ app.listen(8080,()=>{
     console.log("listening at port 8080");
 });
 
-let url = 'mongodb://127.0.0.1:27017/TravellerHub';
+//let url = 'mongodb://127.0.0.1:27017/TravellerHub';
 
-
-async function main() {
-  await mongoose.connect(url);
-}
-main().then(()=>{console.log("connected succesfully")}).catch(err => console.log(err));
 
 app.use((req, res, next) => {
    res.locals.success = req.flash("success");
