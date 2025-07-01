@@ -2,63 +2,74 @@
 <body>
     <br/>
     
-     <h2 style="margin-left: 11rem;">         Create your new listings</h2>
+    <h2 style="margin-left: 11rem;">Create your new listings</h2>
     <form method="POST" action="/listing" novalidate class="needs-validation" enctype="multipart/form-data">
         <div class="row">
             <div class="col-8 offset-2">
-        <div class="mb-3">
-              <label class="form-label" for="title">title</label>
-        <input name="listing[title]" placeholder="Enter the property title" type="text" class="form-control" required/>
-        <br />
-        <div class="invalid-feedback">enter a valid title </div>
-        </div>
-        <div class="mb-3">
-           <label class="form-label" for="description">description</label>
-        <textarea name="listing[description]" type="text" class="form-control" required></textarea>
-        <br />
-        <div class="invalid-feedback">Enter some description</div>
-    </div>
-   
-       <!-- <div class="mb-3">
-        <label for="image" class="form-label">Image/URL</label>
-        <input name="listing[image][url]" placeholder="Add img url" type="text" class="form-control" required/>
-        <br />
-        <div class="invalid-feedback">enter the img url</div>
-    </div>  -->
-    <div class="mb-3">
-        <label for="image" class="form-label">Upload image</label>
-        <input name="listing[image]" placeholder="Add img url" type="file" class="form-control" required/>
-        <br />
-        <div class="invalid-feedback">enter the img url</div>
-    </div> 
-     <div class="row">
-             <div class="mb-3 col-md-4">
-        <label for="price" class="form-label">Price</label>
-        <input name="listing[price]" placeholder="Enter the property price" type="number" class="form-control" required/>
-        <br />
-        <div class="invalid-feedback">enter valid price</div>
-    </div>
+                <div class="mb-3">
+                    <label class="form-label" for="title">Title</label>
+                    <input name="listing[title]" placeholder="Enter the property title" type="text" class="form-control" required/>
+                    <br />
+                    <div class="invalid-feedback">Enter a valid title</div>
+                </div>
 
-        <div class="mb-3 col-md-8">
+                <div class="mb-3">
+                    <label class="form-label" for="description">Description</label>
+                    <textarea name="listing[description]" type="text" class="form-control" required></textarea>
+                    <br />
+                    <div class="invalid-feedback">Enter some description</div>
+                </div>
+               
+                <div class="mb-3">
+                    <label for="image" class="form-label">Upload image</label>
+                    <input name="listing[image]" placeholder="Add img url" type="file" class="form-control" required/>
+                    <br />
+                    <div class="invalid-feedback">Enter the img url</div>
+                </div> 
 
-            <label for="country" class="form-label">country</label>
-             <input name="listing[country]" placeholder="Enter the property country" type="text" class="form-control" required/>
-             <div class="invalid-feedback">enter a valid country</div>
-        <br />
+                <div class="row">
+                    <div class="mb-3 col-md-4">
+                        <label for="price" class="form-label">Price</label>
+                        <input name="listing[price]" placeholder="Enter the property price" type="number" class="form-control" required/>
+                        <br />
+                        <div class="invalid-feedback">Enter valid price</div>
+                    </div>
 
+                    <div class="mb-3 col-md-8">
+                        <label for="country" class="form-label">Country</label>
+                        <input name="listing[country]" placeholder="Enter the property country" type="text" class="form-control" required/>
+                        <div class="invalid-feedback">Enter a valid country</div>
+                        <br />
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="location" class="form-label">Location</label>
+                    <input name="listing[location]" placeholder="Enter the property location" type="text" class="form-control" required/>
+                    <div class="invalid-feedback">Enter location</div>
+                    <br />
+                </div>
+
+                <!-- ✅ Category Dropdown -->
+                <div class="mb-3">
+                    <label for="category" class="form-label">Category</label>
+                    <select class="form-select" id="category" name="listing[category]">
+                        <option value="">Select a Category (Optional)</option>
+                        <option>rooms</option>
+                        <option>iconic cities</option>
+                        <option>mountains</option>
+                        <option>castle</option>
+                        <option>pool</option>
+                        <option>beaches</option>
+                        <option>farms</option>
+                        <option>arctic</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-dark add-btn" style="width: 7%; margin-left: 12rem;">Add</button>
+            </div> 
         </div>
-        </div>
-        <div class="mb-3">
-            <label for="location" class="form-label">Location</label>
-<input name="listing[location]" placeholder="Enter the property location" type="text" class="form-control" required/>
-        <div class="invalid-feedback">enter location</div><br />
-        </div>
-       
-       </div> 
-        <button class="btn btn-dark add-btn" style="width: 7%;margin-left: 12rem;">Add</button>
- 
     </form>
-    </div>
-           <br/>
+    <br/>
     <br/>
 </body>

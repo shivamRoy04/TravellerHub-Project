@@ -45,6 +45,18 @@
                     <div class="invalid-feedback">Enter Location</div>
                 </div>
 
+                <!-- ✅ Category Dropdown -->
+                <div class="mb-3">
+                    <label for="category" class="form-label">Category</label>
+                    <select class="form-select" id="category" name="listing[category]">
+                        <option value="">Select a Category (Optional)</option>
+                        <% const categories = ["rooms", "iconic cities", "mountains", "castle", "pool", "beaches", "farms", "arctic"]; %>
+                        <% categories.forEach(c => { %>
+                            <option value="<%= c %>" <% if (item.category === c) { %>selected<% } %>><%= c %></option>
+                        <% }) %>
+                    </select>
+                </div>
+
                 <button class="btn btn-dark edit-btn" style="width: 10%;">Edit</button>
 
             </div>
@@ -53,5 +65,3 @@
     <br />
     <br />
 </body>
-
-

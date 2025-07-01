@@ -1,5 +1,12 @@
-if(process.env.NODE_ENV !="production"){
-require('dotenv').config();}
+require('dotenv').config();
+console.log("DEBUG: After dotenv load - CLOUD_NAME:", process.env.CLOUD_NAME);
+console.log("DEBUG: After dotenv load - CLOUD_API_KEY:", process.env.CLOUD_API_KEY);
+console.log("DEBUG: After dotenv load - CLOUD_API_SECRET:", process.env.CLOUD_API_SECRET);
+const fs = require('fs');
+
+
+
+
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
@@ -54,11 +61,6 @@ app.listen(8080,()=>{
     console.log("listening at port 8080");
 });
 
-app.get("/",(req,res)=>{
-    res.send("HI im root");
-});
-
-
 let url = 'mongodb://127.0.0.1:27017/TravellerHub';
 
 
@@ -96,9 +98,17 @@ const validateReview = (req, res, next) => {
 
 
 //index page
-app.get("/listings" ,wrapAsync( async(req,res)=>{
-  let allListings = await Listing.find({});
-  res.render("./listings/index.ejs",{allListings});
+app.get("/listings", wrapAsync(async (req, res) => {
+  const { category } = req.query;
+  let allListings;
+
+  if (category) {
+    allListings = await Listing.find({ category });
+  } else {
+    allListings = await Listing.find({});
+  }
+
+  res.render("./listings/index.ejs", { allListings, category });
 }));
 
 
