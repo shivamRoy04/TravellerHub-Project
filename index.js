@@ -99,22 +99,30 @@ const validateReview = (req, res, next) => {
 
 //index page
 app.get("/listings", wrapAsync(async (req, res) => {
-  let { category } = req.query;
+  let { category, search } = req.query;
   let allListings;
 
+  const queryObj = {};
+
   if (category) {
-    category = category.toLowerCase();  
-    allListings = await Listing.find({ category });
-  } else {
-    allListings = await Listing.find({});
+    queryObj.category = category.toLowerCase();
   }
 
-  // ✅ Debug logs go here:
-  console.log("DEBUG filter:", category || "All");
+  if (search) {
+    queryObj.$or = [
+      { title: { $regex: search, $options: "i" } },
+      { location: { $regex: search, $options: "i" } }
+    ];
+  }
+
+  allListings = await Listing.find(queryObj);
+
+  console.log("DEBUG filter:", category || "All", "Search:", search || "None");
   console.log("Listings returned:", allListings.length);
 
   res.render("./listings/index.ejs", { allListings, category });
 }));
+
 
 
 
