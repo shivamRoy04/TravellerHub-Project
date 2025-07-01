@@ -99,17 +99,23 @@ const validateReview = (req, res, next) => {
 
 //index page
 app.get("/listings", wrapAsync(async (req, res) => {
-  const { category } = req.query;
+  let { category } = req.query;
   let allListings;
 
   if (category) {
+    category = category.toLowerCase();  
     allListings = await Listing.find({ category });
   } else {
     allListings = await Listing.find({});
   }
 
+  // ✅ Debug logs go here:
+  console.log("DEBUG filter:", category || "All");
+  console.log("Listings returned:", allListings.length);
+
   res.render("./listings/index.ejs", { allListings, category });
 }));
+
 
 
 //new form
